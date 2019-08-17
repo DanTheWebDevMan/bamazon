@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var Table = require('cli-table');
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -16,69 +17,98 @@ var connection = mysql.createConnection({
   database: "bamazon"
 });
 
-// connect to the mysql server and sql database
-connection.connect(function(err) {
-    if (err) throw err;
-    // run the start function after the connection is made to prompt the user
-    // start();
-  });
-
-  // function which prompts the user for what action they should take
-  var displayProducts = function(){
-	var query = "Select * FROM products";
-	connection.query(query, function(err, res){
-		if(err) throw err;
-		var displayTable = new Table ({
-			head: ["Item ID", "Product Name", "Category", "Price", "Quantity"],
-			// colWidths: [10,25,25,10,14]
-        });
-        
-		for(var i = 0; i < res.length; i++){
-			displayTable.push(
-				[res[i].item_id,res[i].product_name, res[i].department_name, res[i].price, res[i].stock_qty]
-				);
-		}
-		console.log(displayTable.toString());
-		purchasePrompt();
-	});
-}
-
-function purchasePrompt(){
-	inquirer.prompt([
-	{
-		name: "ID",
-		type: "input",
-		message:"Please enter Item ID you like to purchase.",
-		filter:Number
-	},
-	{
-		name:"Quantity",
-		type:"input",
-		message:"How many items do you wish to purchase?",
-		filter:Number
-	},
-
- ]).then(function(answers){
- 	var quantityNeeded = answers.Quantity;
- 	var IDrequested = answers.items_id;
- 	purchaseOrder(IDrequested, quantityNeeded);
- });
-};
-
-function purchaseOrder(item_id, amtNeeded){
-	connection.query('Select * FROM products WHERE item_id = ' + item_id, function(err,res){
-		if(err){console.log(err)};
-		if(amtNeeded <= res[0].stock_quantity){
-			var totalCost = res[0].price * amtNeeded;
-			console.log("Good news, plenty in stock!");
-			console.log("Your total cost for " + amtNeeded + " " +res[0].product_name + " is " + totalCost + " Thank you!");
-
-			connection.query("UPDATE products SET stock_quantity = stock_quantity - " + amtNeeded + "WHERE item_id = " + item_id);
-		} else{
-			console.log("Insufficient quantity!" + res[0].product_name + "to complete your order.");
-		};
-		displayProducts();
-	});
-};
-
-displayProducts(); 
+function start(){
+    //prints the items for sale and their details
+    connection.query('SELECT * FROM products', function(err, res){
+      if(err) throw err;
+  
+      for(var i = 0; i<res.length;i++){
+        console.log("ID: " + res[i].item_id + " | " + "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: " + res[i].price + " | " + "QTY: " + res[i].stock_qty);
+      }
+    
+      console.log(' ');
+      inquirer.prompt([
+        {
+          type: "input",
+          name: "id",
+          message: "What is the ID of the product you would like to purchase?",
+          validate: function(value){
+            if(isNaN(value) == false && parseInt(value) <= res.length && parseInt(value) > 0){
+              return true;
+            } else{
+              return false;
+            }
+          }
+        },
+        {
+          type: "input",
+          name: "qty",
+          message: "How much would you like to purchase?",
+          validate: function(value){
+            if(isNaN(value)){
+              return false;
+            } else{
+              return true;
+            }
+          }
+        }
+        ]).then(function(ans){
+          var whatToBuy = (ans.id)-1;
+          var howMuchToBuy = parseInt(ans.qty);
+          var grandTotal = parseFloat(((res[whatToBuy].Price)*howMuchToBuy).toFixed(2));
+    
+          //check if enough in stock
+          if(res[whatToBuy].StockQuantity >= howMuchToBuy){
+            //after purchase, updates quantity in Products
+            connection.query("UPDATE products SET ? WHERE ?", [
+            {stock_qty: (res[whatToBuy].stock_qty - howMuchToBuy)},
+            {item_id: ans.id}
+            ], function(err, result){
+                if(err) throw err;
+                console.log("Success! Your total is $" + grandTotal.toFixed(2) + ". Your item(s) will be shipped to you in 3-5 business days.");
+            });
+    
+            connection.query("SELECT * FROM departments", function(err, deptRes){
+              if(err) throw err;
+              var index;
+              for(var i = 0; i < deptRes.length; i++){
+                if(deptRes[i].department_name === res[whatToBuy].department_name){
+                  index = i;
+                }
+              }
+              
+              //updates totalSales in departments table
+              connection.query("UPDATE Departments SET ? WHERE ?", [
+              {TotalSales: deptRes[index].TotalSales + grandTotal},
+              {department_name: res[whatToBuy].department_name}
+              ], function(err, deptRes){
+                  if(err) throw err;
+                  //console.log("Updated Dept Sales.");
+              });
+            });
+    
+          } else{
+            console.log("Sorry, there's not enough in stock!");
+          }
+    
+          reprompt();
+        })
+    })
+    }
+    
+    //asks if they would like to purchase another item
+    function reprompt(){
+      inquirer.prompt([{
+        type: "confirm",
+        name: "reply",
+        message: "Would you like to purchase another item?"
+      }]).then(function(ans){
+        if(ans.reply){
+          start();
+        } else{
+          console.log("Thank you for your business!");
+        }
+      });
+    }
+    
+    start();
