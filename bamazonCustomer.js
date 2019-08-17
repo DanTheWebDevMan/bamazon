@@ -3,7 +3,7 @@ var inquirer = require("inquirer");
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
-  host: "root",
+  host: "localhost",
 
   // Your port; if not 3306
   port: 3307,
@@ -20,7 +20,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) throw err;
     // run the start function after the connection is made to prompt the user
-    start();
+    // start();
   });
 
   // function which prompts the user for what action they should take
@@ -48,7 +48,7 @@ function purchasePrompt(){
 	{
 		name: "ID",
 		type: "input",
-		message:"Please enter Item ID you like to purhcase.",
+		message:"Please enter Item ID you like to purchase.",
 		filter:Number
 	},
 	{
