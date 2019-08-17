@@ -56,7 +56,7 @@ function start(){
         ]).then(function(ans){
           var whatToBuy = (ans.id) - 1;
           var howMuchToBuy = parseInt(ans.qty);
-          var grandTotal = parseFloat(((res[whatToBuy].Price)* howMuchToBuy).toFixed(2));
+          var grandTotal = parseFloat(((res[whatToBuy].price)* howMuchToBuy).toFixed(2));
     
           //check if enough in stock
           if(res[whatToBuy].stock_qty >= howMuchToBuy){
