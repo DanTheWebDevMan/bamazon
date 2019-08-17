@@ -48,3 +48,20 @@ In this activity, we created an Amazon-like storefront with the MySQL skills  le
 ## *How does it look?*
 Note: Red arrows display user command and input inside terminal and responses
 
+**mySQL code**
+Code ran in workbench:
+![mysqlcode](https://raw.githubusercontent.com/DanTheWebDevMan/bamazon/master/images/mysqlcode.jpg)
+
+Database create from above code:
+![mysqldatabase](https://raw.githubusercontent.com/DanTheWebDevMan/bamazon/master/images/database.jpg)
+
+After Connecting JS file to sql, this is how the terminal looks like once booted:
+![terminalatstart](https://raw.githubusercontent.com/DanTheWebDevMan/bamazon/master/images/pic1.jpg)
+
+Succesfully ran terminal:
+![terminalsuccess](https://raw.githubusercontent.com/DanTheWebDevMan/bamazon/master/images/pic2.jpg)
+
+
+
+
+
