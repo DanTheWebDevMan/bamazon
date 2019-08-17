@@ -24,6 +24,7 @@ function start(){
   
       for(var i = 0; i<res.length;i++){
         console.log("ID: " + res[i].item_id + " | " + "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: " + res[i].price + " | " + "QTY: " + res[i].stock_qty);
+        console.log('----------------------------------------------------------------------------------------------------')
       }
     
       console.log(' ');
@@ -43,7 +44,7 @@ function start(){
         {
           type: "input",
           name: "qty",
-          message: "How much would you like to purchase?",
+          message: "How many would you like to buy?",
           validate: function(value){
             if(isNaN(value)){
               return false;
@@ -53,19 +54,19 @@ function start(){
           }
         }
         ]).then(function(ans){
-          var whatToBuy = (ans.id)-1;
+          var whatToBuy = (ans.id) - 1;
           var howMuchToBuy = parseInt(ans.qty);
-          var grandTotal = parseFloat(((res[whatToBuy].Price)*howMuchToBuy).toFixed(2));
+          var grandTotal = parseFloat(((res[whatToBuy].Price)* howMuchToBuy).toFixed(2));
     
           //check if enough in stock
-          if(res[whatToBuy].StockQuantity >= howMuchToBuy){
+          if(res[whatToBuy].stock_qty >= howMuchToBuy){
             //after purchase, updates quantity in Products
             connection.query("UPDATE products SET ? WHERE ?", [
             {stock_qty: (res[whatToBuy].stock_qty - howMuchToBuy)},
             {item_id: ans.id}
             ], function(err, result){
                 if(err) throw err;
-                console.log("Success! Your total is $" + grandTotal.toFixed(2) + ". Your item(s) will be shipped to you in 3-5 business days.");
+                console.log("Success! Your total is $" + grandTotal.toFixed(2) + ". Your item(s) will be shipped to you in 2 business days.");
             });
     
             connection.query("SELECT * FROM departments", function(err, deptRes){
@@ -83,7 +84,6 @@ function start(){
               {department_name: res[whatToBuy].department_name}
               ], function(err, deptRes){
                   if(err) throw err;
-                  //console.log("Updated Dept Sales.");
               });
             });
     
