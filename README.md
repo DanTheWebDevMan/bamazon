@@ -1,6 +1,8 @@
 # bamazon
 In this activity, we created an Amazon-like storefront with the MySQL skills  learned this unit. The app will take in orders from customers and deplete stock from the store's inventory. 
 
+https://github.com/DanTheWebDevMan/bamazon
+
 ### Challenge Instructions: Customer View (Minimum Requirement)
 
 1. Create a MySQL Database called `bamazon`.
